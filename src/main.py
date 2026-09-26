@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+import time
 from datetime import datetime
 
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
@@ -14,6 +15,7 @@ from src.fetcher import ElectricityFetcher
 from src.formatter import MessageFormatter
 from src.notifiers.email import EmailNotifier
 from src.notifiers.whatsapp import WhatsAppNotifier
+from src.tariffs import TariffCalculator
 
 # Configure logging
 logging.basicConfig(
@@ -29,14 +31,20 @@ def run(
     dry_run: bool = False,
     price_area: str = None,
     threshold: float = None,
+    include_tariffs: bool = None,
+    grid_operator: str = None,
 ):
     area = price_area or config.PRICE_AREA
     thresh = threshold if threshold is not None else config.CHEAP_THRESHOLD_DKK
     top_count = config.TOP_CHEAPEST_COUNT
+    tariffs_enabled = config.INCLUDE_TARIFFS if include_tariffs is None else include_tariffs
+    operator = grid_operator or config.GRID_OPERATOR
 
     logger.info("=" * 55)
     logger.info("Starting Electricity Price Alert Job")
-    logger.info(f"Target Area: {area} | Threshold: {thresh} kr/kWh | Top Cheapest: {top_count}")
+    logger.info(
+        f"Target Area: {area} | Threshold: {thresh} kr/kWh | Top: {top_count} | All-inclusive Tariffs: {tariffs_enabled} ({operator})"
+    )
     logger.info("=" * 55)
 
     fetcher = ElectricityFetcher(price_area=area)
@@ -52,7 +60,6 @@ def run(
         logger.warning(
             f"Prices for tomorrow ({date_to_query}) not yet available. Checking today ({today_date})..."
         )
-        import time
         time.sleep(3)
         date_to_query = today_date
         prices = fetcher.fetch_prices_for_date(date_to_query)
@@ -62,6 +69,18 @@ def run(
         sys.exit(1)
 
     logger.info(f"Retrieved {len(prices)} hourly price records for {date_to_query}.")
+
+    # Calculate all-inclusive tariffs if enabled
+    if tariffs_enabled:
+        tariff_calc = TariffCalculator(grid_operator=operator)
+        for p in prices:
+            breakdown = tariff_calc.calculate_total_price(
+                spot_price_kwh=p["price_kwh"],
+                hour=p["hour"],
+                date_str=p.get("date"),
+            )
+            p["total_price_kwh"] = breakdown["total_price_kwh"]
+            p["tariff_breakdown"] = breakdown
 
     # Analyze prices
     top_cheapest = analyzer.get_top_cheapest(prices)
@@ -75,6 +94,8 @@ def run(
         below_ranges=below_ranges,
         total_below_count=len(below_list),
         day_stats=day_stats,
+        include_tariffs=tariffs_enabled,
+        grid_operator=operator,
     )
 
     subject = f"⚡ Electricity Forecast ({area}) - {date_to_query}"
@@ -115,6 +136,8 @@ def run(
                 below_ranges=below_ranges,
                 total_below_count=len(below_list),
                 day_stats=day_stats,
+                include_tariffs=tariffs_enabled,
+                grid_operator=operator,
             )
             if email.send(subject, plain_text):
                 dispatched_count += 1
@@ -128,6 +151,8 @@ def main():
     parser.add_argument("--zone", type=str, default=None, help="Price zone, e.g. DK2 or DK1")
     parser.add_argument("--threshold", type=float, default=None, help="Cheap threshold in kr/kWh")
     parser.add_argument("--dry-run", action="store_true", help="Print message to console without sending alerts")
+    parser.add_argument("--include-tariffs", action="store_true", default=None, help="Calculate all-inclusive price")
+    parser.add_argument("--operator", type=str, default=None, help="Grid operator name (default: Radius)")
 
     args = parser.parse_args()
     run(
@@ -135,6 +160,8 @@ def main():
         dry_run=args.dry_run,
         price_area=args.zone,
         threshold=args.threshold,
+        include_tariffs=args.include_tariffs,
+        grid_operator=args.operator,
     )
 
 

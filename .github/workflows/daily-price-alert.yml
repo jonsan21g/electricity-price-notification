@@ -33,6 +33,8 @@ jobs:
           PRICE_AREA: "DK2"
           CHEAP_THRESHOLD_DKK: "1.0"
           TOP_CHEAPEST_COUNT: "3"
+          INCLUDE_TARIFFS: "true"
+          GRID_OPERATOR: "Radius"
           NOTIFIERS_ENABLED: "whatsapp"
           CALLMEBOT_PHONE: ${{ secrets.CALLMEBOT_PHONE }}
           CALLMEBOT_API_KEY: ${{ secrets.CALLMEBOT_API_KEY }}

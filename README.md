@@ -6,12 +6,12 @@ An automated, serverless electricity price alert service designed to run for fre
 
 ## 🌟 Features
 
+- **All-Inclusive Consumer Pricing**: Calculates the exact price you pay on your bill (Spot Price + Radius Tarifmodel 3.0 + Energinet Transmission + Elafgift + 25% Moms).
 - **Top 3 Cheapest Hours**: Instantly see tomorrow's cheapest hours to schedule heavy appliances (laundry, dishwasher, EV charging).
-- **Hours Below 1.00 kr/kWh**: Automatically groups consecutive cheap hours into clear time ranges (e.g. `00:00 - 07:00` and `13:00 - 16:00`).
+- **Hours Below 1.00 kr/kWh**: Automatically groups consecutive cheap hours into clear time ranges (e.g. `08:00 - 18:00`).
 - **Negative Price Alert**: Flags any hours where spot prices drop below 0.00 kr.
-- **Zero Cost (GitHub Free Plan)**: Runs in ~20 seconds per day, consuming less than 15 minutes per month (well within GitHub's 2,000 monthly free minutes).
+- **Zero Cost (GitHub Free Plan)**: Runs in ~20 seconds per day, consuming less than 15 minutes per month.
 - **Zero New Phone Apps**: Delivered directly to your normal WhatsApp app.
-- **Extensible Architecture**: Ready to enable Email (SMTP) alongside or in place of WhatsApp whenever desired.
 
 ---
 
@@ -22,20 +22,19 @@ An automated, serverless electricity price alert service designed to run for fre
 📅 Sunday, 27. Sep 2026
 
 📉 Top Cheapest Hours:
-1. 02:00 - 03:00 → 0.12 kr/kWh
-2. 03:00 - 04:00 → 0.15 kr/kWh
-3. 04:00 - 05:00 → 0.20 kr/kWh
+1. 14:00 - 15:00 → 0.01 kr (Total: 0.36 kr)
+2. 15:00 - 16:00 → 0.01 kr (Total: 0.36 kr)
+3. 13:00 - 14:00 → 0.01 kr (Total: 0.37 kr)
 
-🟢 Hours Below 1 kr/kWh:
-• 00:00 - 07:00 (Avg: 0.39 kr/kWh)
-• 10:00 - 16:00 (Avg: 0.75 kr/kWh)
-• 21:00 - 00:00 (Avg: 0.77 kr/kWh)
+🟢 Hours Below 1 kr/kWh (Spot):
+• 08:00 - 18:00 (Avg spot: 0.25 kr → Total: 0.70 kr)
+• 23:00 - 00:00 (Avg spot: 1.00 kr → Total: 1.60 kr)
 
 📊 Daily Overview:
-• Average: 0.89 kr/kWh
-• Low / High: 0.12 – 1.95 kr/kWh
+• Spot Avg: 0.81 kr (Total: 1.40 kr)
+• Spot Range: 0.01 – 1.37 kr (Total: 0.36 – 2.31 kr)
 
-💡 Spot prices via Energi Data Service
+💡 Spot: Energi Data Service | Total: Radius + Tax + 25% Moms
 ```
 
 ---
@@ -94,6 +93,8 @@ All defaults can be adjusted either via `.github/workflows/daily-price-alert.yml
 | `PRICE_AREA` | `DK2` | `DK2` (Zealand / Greater Copenhagen) or `DK1` (Jutland / Funen) |
 | `CHEAP_THRESHOLD_DKK` | `1.0` | Threshold in DKK/kWh below which hours are grouped and reported |
 | `TOP_CHEAPEST_COUNT` | `3` | How many cheapest hours to list in the top ranking |
+| `INCLUDE_TARIFFS` | `true` | When true, calculates and displays all-inclusive price alongside spot price |
+| `GRID_OPERATOR` | `Radius` | Local grid company for Tarifmodel 3.0 (e.g. `Radius` for Greater Copenhagen) |
 | `NOTIFIERS_ENABLED` | `whatsapp` | Channels to send to (`whatsapp`, or `whatsapp,email`) |
 
 ### Customizing the Message Template

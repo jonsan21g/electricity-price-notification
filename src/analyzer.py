@@ -19,10 +19,6 @@ class PriceAnalyzer:
         """
         Finds all hours where price is below the threshold and groups
         consecutive hours into continuous time ranges.
-        Returns:
-            (below_list, grouped_ranges)
-            where grouped_ranges is a list of dicts:
-            {"start_hour": int, "end_hour": int, "range_str": "00:00 - 06:00", "avg_price": float, "hours": list}
         """
         below = [p for p in prices if p["price_kwh"] < self.threshold_kwh]
         if not below:
@@ -58,7 +54,7 @@ class PriceAnalyzer:
         range_str = f"{start_hour:02d}:00 - {end_str}"
         avg_price = sum(item["price_kwh"] for item in group) / len(group)
 
-        return {
+        result = {
             "start_hour": start_hour,
             "end_hour": end_hour,
             "range_str": range_str,
@@ -66,6 +62,13 @@ class PriceAnalyzer:
             "avg_price": round(avg_price, 2),
             "hours": group,
         }
+
+        # Include total all-inclusive average if present
+        if any("total_price_kwh" in item for item in group):
+            avg_total = sum(item.get("total_price_kwh", item["price_kwh"]) for item in group) / len(group)
+            result["avg_total"] = round(avg_total, 2)
+
+        return result
 
     def get_day_stats(self, prices: List[Dict]) -> Dict:
         """Calculates summary statistics for the day."""
@@ -78,7 +81,7 @@ class PriceAnalyzer:
         avg_p = sum(prices_values) / len(prices_values)
         negative_hours = [p for p in prices if p["price_kwh"] < 0.0]
 
-        return {
+        stats = {
             "min_price": round(min_p, 2),
             "max_price": round(max_p, 2),
             "avg_price": round(avg_p, 2),
@@ -86,3 +89,15 @@ class PriceAnalyzer:
             "negative_hours": negative_hours,
             "total_hours": len(prices),
         }
+
+        # Add total price stats if all-inclusive price is calculated
+        total_values = [p["total_price_kwh"] for p in prices if "total_price_kwh" in p]
+        if total_values:
+            stats["has_totals"] = True
+            stats["min_total"] = round(min(total_values), 2)
+            stats["max_total"] = round(max(total_values), 2)
+            stats["avg_total"] = round(sum(total_values) / len(total_values), 2)
+        else:
+            stats["has_totals"] = False
+
+        return stats

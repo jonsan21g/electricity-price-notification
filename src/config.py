@@ -19,6 +19,10 @@ PRICE_AREA = os.getenv("PRICE_AREA", "DK2").upper()
 CHEAP_THRESHOLD_DKK = float(os.getenv("CHEAP_THRESHOLD_DKK", "1.0"))
 TOP_CHEAPEST_COUNT = int(os.getenv("TOP_CHEAPEST_COUNT", "3"))
 
+# Tariff & all-inclusive price calculation
+INCLUDE_TARIFFS = os.getenv("INCLUDE_TARIFFS", "true").lower() in ("true", "1", "yes")
+GRID_OPERATOR = os.getenv("GRID_OPERATOR", "Radius").strip()
+
 # CallMeBot WhatsApp settings
 CALLMEBOT_PHONE = os.getenv("CALLMEBOT_PHONE", "").strip().lstrip("+")
 CALLMEBOT_API_KEY = os.getenv("CALLMEBOT_API_KEY", "").strip()

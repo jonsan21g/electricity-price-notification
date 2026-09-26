@@ -1,0 +1,1 @@
+"""Electricity price notification package."""

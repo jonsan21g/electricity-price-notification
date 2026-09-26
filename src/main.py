@@ -52,6 +52,8 @@ def run(
         logger.warning(
             f"Prices for tomorrow ({date_to_query}) not yet available. Checking today ({today_date})..."
         )
+        import time
+        time.sleep(3)
         date_to_query = today_date
         prices = fetcher.fetch_prices_for_date(date_to_query)
 

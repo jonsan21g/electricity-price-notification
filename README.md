@@ -1,6 +1,6 @@
 # ⚡ Electricity Price Notifier (Denmark - DK2)
 
-An automated, serverless electricity price alert service designed to run for free on **GitHub Actions**. It queries official Danish spot prices from **Energi Data Service (Energinet)** every afternoon at 13:30 CET, analyzes the upcoming 24 hours, and sends a formatted notification directly to your **WhatsApp** via CallMeBot.
+An automated, serverless electricity price alert service designed to run for free on **GitHub Actions**. It queries official Danish spot prices from **Energi Data Service (Energinet)** every afternoon at 13:21 CET/CEST, analyzes the upcoming 24 hours, and sends a formatted notification directly to your **WhatsApp** via CallMeBot.
 
 ---
 

@@ -2,10 +2,11 @@ name: Daily Electricity Price Alert
 
 on:
   schedule:
-    # 13:30 CET (Winter is UTC+1 -> 12:30 UTC, Summer is UTC+2 -> 11:30 UTC)
-    # Day-ahead spot prices are released daily by ~13:00 CET.
-    # Running at 12:30 UTC guarantees data availability year-round (13:30 CET / 14:30 CEST).
-    - cron: '30 12 * * *'
+    # 13:21 Danish Local Time:
+    # Summer (CEST, UTC+2) April to October: 11:21 UTC -> 13:21 CEST
+    - cron: '21 11 * 4-10 *'
+    # Winter (CET, UTC+1) November to March: 12:21 UTC -> 13:21 CET
+    - cron: '21 12 * 1-3,11-12 *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab for easy testing
 
 jobs:
